@@ -5,9 +5,7 @@ modspath="$stardewpath/Mods"
 smapi="https://github.com/Pathoschild/SMAPI/releases/latest/download/SMAPI-3.18.6-installer.zip"
 
 # Setup, param checking and user confirmation
-[ $# -eq 0 ] && echo "Usage starmod.sh <modfile>" && exit 1
-modfile=$(realpath "$1")
-[ ! -f "$modfile" ] && echo "File $modfile not found" && exit 1
+[ $# -eq 0 ] && echo "Usage starmod.sh <modfile1> <modfile2> etc" && exit 1
 [ ! -d "$stardewpath" ] && echo "ERROR: Stardew Valley is not installed" && exit 1
 echo "WARNING: This process will delete your stardew valley mods folder and open all the listed mods in your browser at once. Do you wish to continue? (y/n)"
 read confirmation
@@ -36,15 +34,21 @@ rm SMAPI.zip || echo "ERROR: Failed to remove SMAPI.zip" || exit 1
 # Build URLs and open in default browser
 mods_found=false
 echo "Opening mod pages in browser"
-while IFS= read -r line; do 
-  name=$(echo $line | awk -F "\"*,\"*" '{print $1}')
-  mod_id=$(echo $line | awk -F "\"*,\"*" '{print $2}')
-  file_id=$(echo $line | awk -F "\"*,\"*" '{print $3}')
-  [[ -z $name || -z $mod_id || -z $file_id ]] && continue
-  mods_found=true
-  url="https://www.nexusmods.com/stardewvalley/mods/$mod_id/?tab=files&file_id=$file_id"
-  xdg-open $url
-done < $modfile
+cd .. # Need to go back to the original location to deal with relative paths
+for file in "$@"; do
+  modfile="$(realpath $file)"
+  [ ! -f "$modfile" ] && echo "File $modfile not found" && exit 1
+  while IFS= read -r line; do 
+    name=$(echo $line | awk -F "\"*,\"*" '{print $1}')
+    mod_id=$(echo $line | awk -F "\"*,\"*" '{print $2}')
+    file_id=$(echo $line | awk -F "\"*,\"*" '{print $3}')
+    [[ -z $name || -z $mod_id || -z $file_id ]] && continue
+    mods_found=true
+    url="https://www.nexusmods.com/stardewvalley/mods/$mod_id/?tab=files&file_id=$file_id"
+    xdg-open $url
+  done < $modfile
+done
+cd starmod-data
 
 [ $mods_found ] || echo "ERROR: No mods found in provided file" || exit 1
 
