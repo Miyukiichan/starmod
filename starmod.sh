@@ -39,6 +39,8 @@ for file in "$@"; do
   modfile="$(realpath $file)"
   [ ! -f "$modfile" ] && echo "File $modfile not found" && exit 1
   while IFS= read -r line; do 
+    # Remove comments
+    line="$(echo $line | sed 's/\#.*//' | xargs)"
     name=$(echo $line | awk -F "\"*,\"*" '{print $1}')
     mod_id=$(echo $line | awk -F "\"*,\"*" '{print $2}')
     file_id=$(echo $line | awk -F "\"*,\"*" '{print $3}')
