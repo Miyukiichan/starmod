@@ -54,17 +54,4 @@ cd starmod-data
 
 [ $mods_found ] || echo "ERROR: No mods found in provided file" || exit 1
 
-echo "Please download the zip files and place them in $(pwd)/Mods"
-echo "Once this has been done, press enter to install the downloaded mods"
-read
-
-[ -z "$(ls Mods)" ] && echo "ERROR: No mods found in folder" && exit 1
-
-echo "Installing mods"
-for mod in Mods/*; do
-  # Assume that the zip file contains a directory at the root - nexus mods tend to do that
-  unzip -q -o "$mod" -d "$modspath" &
-done
-wait
-
-echo "Process finished"
+echo "You can now download the mods and then run the install-mods.sh script to install them"
